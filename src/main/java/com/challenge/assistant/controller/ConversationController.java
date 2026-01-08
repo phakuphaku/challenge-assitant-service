@@ -17,7 +17,11 @@ import java.util.UUID;
 @RequestMapping("/api/v1/conversations")
 public class ConversationController {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public ConversationController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @PostMapping
     public ResponseEntity<CreateConversationResponse> createConversation() {
