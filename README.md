@@ -141,6 +141,23 @@ Se incluyen diagramas de referencia para facilitar la comprensión del diseño:
 
 ---
 
+## Estructura del proyecto
+
+El microservicio sigue una estructura simple por capas, pensada para mantener responsabilidades claras y permitir extensiones futuras sin demasiada dificultad.
+
+- controller: expone la API REST y gestiona requests/responses
+- service: orquesta el flujo conversacional y la lógica del asistente
+- repository: capa de persistencia (JPA)
+- model: entidades de dominio y enums
+- dto: contratos de la API (objetos request/response)
+- client: integraciones con servicios externos (yesno.wtf)
+- config: configuración de infraestructura (clientes HTTP, timeouts)
+- exception: manejo centralizado de errores
+
+> Nota: todo el código fuente y los contratos de la API están escritos en inglés, siguiendo convenciones habituales mientras que la documentación se presenta en español para mas claridad.
+
+---
+
 ## Fuera de alcance
 
 Los siguientes aspectos quedan explícitamente fuera del alcance de esta implementación:
