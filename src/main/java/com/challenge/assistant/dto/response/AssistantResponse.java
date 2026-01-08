@@ -2,13 +2,19 @@ package com.challenge.assistant.dto.response;
 
 public class AssistantResponse {
 
-    private String response;
+    private String reply;
+    private String source;
 
-    public AssistantResponse(String response) {
-        this.response = response;
+    public AssistantResponse(String reply, String source) {
+        this.reply = reply;
+        this.source = source;
     }
 
-    public String getResponse() {
-        return response;
+    public String getReply() {
+        return reply;
+    }
+
+    public String getSource() {
+        return source;
     }
 }
