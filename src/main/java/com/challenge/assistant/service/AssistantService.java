@@ -1,4 +1,5 @@
 package com.challenge.assistant.service;
 
-public class AssistantService {
+public interface AssistantService {
+    String respond(String message);
 }
