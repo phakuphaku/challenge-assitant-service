@@ -6,6 +6,22 @@ Este repositorio implementa un microservicio conceptual denominado **Conversatio
 
 El alcance funcional se mantiene deliberadamente acotado para priorizar claridad arquitectónica, extensibilidad y buenas prácticas de diseño.
 
+## Índice
+- Descripción general del proyecto: Propósito del challenge y objetivo del microservicio.
+- Rol del microservicio: Responsabilidades principales del Conversation Orchestrator Service dentro de una arquitectura conversacional.
+- Decisión de diseño principal: Uso de la API externa yesno.wtf como simulación de un motor de decisión.
+- API propuesta: Endpoints REST expuestos, responsabilidades y contratos de entrada/salida.
+- Lógica del asistente: Reglas de procesamiento de mensajes y comportamiento de fallback.
+- Persistencia:  Modelo de datos y criterios de diseño para el almacenamiento del historial conversacional.
+- Gestión de errores:  Estrategia de manejo de errores y respuestas HTTP.
+- Observabilidad: Métricas técnicas y funcionales sugeridas para entornos productivos.
+- Escalabilidad: Consideraciones de diseño para escalado horizontal.
+- Seguridad (opcional): Enfoque y posibles extensiones de seguridad no implementadas.
+- Diagramas:Diagramas de componentes y de secuencia incluidos en el proyecto.
+- Estructura del proyecto: Organización por capas y responsabilidades de cada paquete.
+- Fuera de alcance: Funcionalidades explícitamente excluidas de esta implementación.
+- Estado actual de la implementación: Qué está implementado hoy y cuáles son los próximos pasos planificados.
+
 ---
 
 ## Rol del microservicio
@@ -169,3 +185,18 @@ Los siguientes aspectos quedan explícitamente fuera del alcance de esta impleme
 - Comunicación en tiempo real (WebSockets)
 
 Estos elementos podrían incorporarse en una evolución posterior del sistema sin requerir cambios estructurales significativos.
+
+---
+
+## Estado actual de la implementación
+
+El microservicio cuenta actualmente con una implementación funcional mínima que cubre los siguientes aspectos del desafío:
+Exposición de una API REST para la creación de conversaciones y el envío de mensajes.
+Procesamiento básico de mensajes mediante reglas simples.
+Integración con una API pública externa (yesno.wtf) para simular la toma de decisiones del asistente ante preguntas cerradas.
+Respuesta alternativa (fallback) para mensajes que no cumplen las condiciones de integración externa.
+Pruebas automáticas ejecutables con mvn test, que validan:
+La creación de conversaciones.
+El comportamiento del endpoint de mensajes.
+El uso correcto de la integración externa mediante mocks, sin dependencia de servicios reales.
+La persistencia del historial de conversaciones y el manejo avanzado de errores se encuentran planificados como siguientes pasos de evolución del servicio.
