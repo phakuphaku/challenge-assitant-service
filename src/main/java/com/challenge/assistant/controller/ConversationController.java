@@ -1,58 +1,81 @@
 package com.challenge.assistant.controller;
 
-
+import com.challenge.assistant.dto.ConversationResponseDTO;
+import com.challenge.assistant.dto.MessageResponseDTO;
+import com.challenge.assistant.dto.request.UserMessageRequest;
+import com.challenge.assistant.model.Conversation;
+import com.challenge.assistant.model.Message;
+import com.challenge.assistant.persistence.repository.ConversationRepository;
+import com.challenge.assistant.persistence.repository.MessageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import com.challenge.assistant.dto.request.UserMessageRequest;
-import com.challenge.assistant.dto.response.AssistantResponse;
-import com.challenge.assistant.dto.response.CreateConversationResponse;
-
-import java.util.Map;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/conversations")
 public class ConversationController {
 
-    private final RestTemplate restTemplate;
+    @Autowired
+    private ConversationRepository conversationRepository;
 
-    public ConversationController(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    @Autowired
+    private MessageRepository messageRepository;
 
     @PostMapping
-    public ResponseEntity<CreateConversationResponse> createConversation() {
-        CreateConversationResponse response =
-                new CreateConversationResponse(UUID.randomUUID().toString());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ConversationResponseDTO> createConversation() {
+        Conversation conv = new Conversation();
+        conversationRepository.save(conv);
+
+        ConversationResponseDTO dto = new ConversationResponseDTO(
+            conv.getId(),
+            conv.getMessages().stream()
+                    .map(m -> new MessageResponseDTO(m.getContent()))
+                    .toList()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
+
 
     @PostMapping("/{id}/messages")
-    public ResponseEntity<AssistantResponse> postMessage(
-            @PathVariable String id,
-            @RequestBody UserMessageRequest request) {
+    public ResponseEntity<ConversationResponseDTO> addMessage(
+            @PathVariable Long id,
+            @RequestBody UserMessageRequest content) {
 
-        String userMessage = request.getMessage();
+        return conversationRepository.findById(id)
+                .map(conv -> {
+                    Message msg = new Message();
+                    msg.setContent(content.getMessage());
+                    conv.addMessage(msg);
+                    conversationRepository.save(conv);
 
-        if (userMessage != null && userMessage.contains("?")) {
-            Map<?, ?> apiResponse =
-                    restTemplate.getForObject("https://yesno.wtf/api", Map.class);
-
-            String answer = apiResponse.get("answer").toString();
-            return ResponseEntity.ok(new AssistantResponse(answer, "yesno.wtf"));
-        }
-
-        return ResponseEntity.ok(
-                new AssistantResponse(
-                        "Could you please rephrase your question?",
-                        "fallback"));
+                    ConversationResponseDTO dto = new ConversationResponseDTO(
+                            conv.getId(),
+                            conv.getMessages().stream()
+                                    .map(m -> new MessageResponseDTO(m.getContent()))
+                                    .toList()
+                    );
+                    return ResponseEntity.ok(dto);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<String> getConversation(@PathVariable String id) {
-        return ResponseEntity.ok("Conversation " + id);
+    
+    @GetMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<ConversationResponseDTO> getConversation(@PathVariable Long id) {
+        return conversationRepository.findById(id)
+                .map(conv -> {
+                    ConversationResponseDTO dto = new ConversationResponseDTO(
+                            conv.getId(),
+                            conv.getMessages().stream()
+                                    .map(m -> new MessageResponseDTO(m.getContent()))
+                                    .toList()
+                    );
+                    return ResponseEntity.ok(dto);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
