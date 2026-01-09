@@ -1,5 +1,4 @@
-package com.challenge.assistant;//.persistence.repository;
-//TODO Arreglar esta ubicacion
+package com.challenge.assistant.persistence.repository;
 
 import com.challenge.assistant.model.Conversation;
 import com.challenge.assistant.model.Message;
@@ -15,6 +14,7 @@ public class ConversationRepositoryTest {
     @Autowired
     private ConversationRepository conversationRepository;
 
+    @SuppressWarnings("unused")
     @Autowired
     private MessageRepository messageRepository;
 
