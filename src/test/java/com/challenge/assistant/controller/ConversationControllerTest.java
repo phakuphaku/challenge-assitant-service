@@ -22,7 +22,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
+/**
+ * Integration tests for ConversationController.
+ * Focused on HTTP contract and persistence behavior.
+ * Conversational routing and external integrations are out of scope.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ConversationControllerTest {
@@ -39,6 +43,13 @@ class ConversationControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists());
     }
+
+/**
+ * Quedo fuera del scope, pero deberia implementarse en un futuro.
+ * Actualmente no hay fallback.
+ * @throws Exception
+ */    
+//TODO: Enable when routing strategy is implemented
 @Test
 void shouldReturnFallbackWhenNoQuestionMark() throws Exception {
 
@@ -59,7 +70,10 @@ void shouldReturnFallbackWhenNoQuestionMark() throws Exception {
             .andExpect(status().isOk());
 }
 
-
+/**
+ * Era la intencion inicial, pero por el momento esta logica no esta implementada.
+ * @throws Exception
+ */
 @Test
 void shouldCallExternalApiWhenQuestionMarkPresent() throws Exception {
 
@@ -94,6 +108,10 @@ Los remuevo para ver que pasen los tests.
     @Autowired
     private MessageRepository messageRepository;
 */
+
+/**
+ * Aqui se prueban todas las funcionalidades implementadas y es lo que da sentido a la estructura actual.
+ */
     @Test
     void testCreateAndAddMessage() throws Exception {
         // Crear conversación
