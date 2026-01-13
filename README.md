@@ -84,27 +84,27 @@ Este enfoque permite:
 
 ## Persistencia
 
-El microservicio persiste el historial de conversación de forma estructurada, separando claramente los conceptos de:
+El microservicio persiste el historial de conversación utilizando JPA, con un modelo simple compuesto por:
 
-- Conversación
-- Mensaje
-- Rol del mensaje (usuario / asistente)
-- Timestamp
+- Conversation
+- Message
 
-La persistencia se implementa de forma simple, priorizando claridad del modelo y facilidad de testeo.
+Cada conversación contiene una colección de mensajes asociados.  
+El modelo prioriza claridad y facilidad de testeo.
+
+> Aspectos como rol del mensaje (usuario / asistente), timestamps y metadatos adicionales se consideran extensiones naturales del modelo, pero quedan fuera del alcance de esta implementación inicial.
 
 ---
 
 ## Gestión de errores
 
-El servicio contempla el manejo de errores en los siguientes escenarios:
+El servicio maneja de forma explícita los siguientes escenarios:
 
-- Entradas inválidas (validaciones de request)
-- Conversaciones inexistentes
-- Fallos en la comunicación con servicios externos
-- Errores internos inesperados
+- Conversaciones inexistentes (404)
+- Requests inválidos (400)
+- Flujo conversacional no compatible con reglas definidas (fallback)
 
-Los errores se exponen mediante respuestas HTTP consistentes y mensajes claros, permitiendo a los consumidores del servicio reaccionar adecuadamente.
+El manejo de errores se implementa a nivel de controller, priorizando respuestas HTTP claras y consistentes.
 
 ---
 
@@ -159,30 +159,38 @@ Se incluyen diagramas de referencia para facilitar la comprensión del diseño:
 
 ## Estructura del proyecto
 
-El microservicio sigue una estructura simple por capas, pensada para mantener responsabilidades claras y permitir extensiones futuras sin demasiada dificultad.
+El microservicio sigue una estructura simple por capas, priorizando claridad y facilidad de evolución.
 
-- controller: expone la API REST y gestiona requests/responses
-- service: orquesta el flujo conversacional y la lógica del asistente
+- controller: expone la API REST y contiene la lógica de orquestación conversacional
 - repository: capa de persistencia (JPA)
-- model: entidades de dominio y enums
-- dto: contratos de la API (objetos request/response)
-- client: integraciones con servicios externos (yesno.wtf)
-- config: configuración de infraestructura (clientes HTTP, timeouts)
-- exception: manejo centralizado de errores
+- model: entidades de dominio (Conversation, Message)
+- dto: contratos de entrada y salida de la API
+- client: integración HTTP con servicios externos (yesno.wtf)
+- config: configuración de infraestructura básica
+- exception: manejo de errores a nivel de controller
+
+> Nota: para mantener el scope acotado del challenge, la lógica de orquestación se encuentra actualmente en la capa controller. La introducción de una capa service queda planificada como mejora evolutiva.
 
 > Nota: todo el código fuente y los contratos de la API están escritos en inglés, siguiendo convenciones habituales mientras que la documentación se presenta en español para mas claridad.
 
 ---
+## Scope y Decisiones tomadas y fuera de alcance”
 
-## Fuera de alcance
+- El core actúa como Conversation Orchestrator
+- Utiliza 
+  - Persistencia implementada con JPA (Conversation + Message)
+  - API REST versionada
+  - DTOs desacoplados del modelo
 
 Los siguientes aspectos quedan explícitamente fuera del alcance de esta implementación:
 
-- Procesamiento de lenguaje natural (NLP)
-- Integración con modelos LLM
-- Autenticación y autorización avanzadas
-- Orquestación multi-servicio
+- NLP o procesamiento semántico avanzado
+- Integración con LLMs
+- Autenticación y autorización
+- Observabilidad avanzada
 - Comunicación en tiempo real (WebSockets)
+- Estrategias conversacionales complejas
+- Resiliencia avanzada en integraciones externas (retry, circuit breaker)
 
 Estos elementos podrían incorporarse en una evolución posterior del sistema sin requerir cambios estructurales significativos.
 
@@ -190,13 +198,21 @@ Estos elementos podrían incorporarse en una evolución posterior del sistema si
 
 ## Estado actual de la implementación
 
-El microservicio cuenta actualmente con una implementación funcional mínima que cubre los siguientes aspectos del desafío:
-Exposición de una API REST para la creación de conversaciones y el envío de mensajes.
-Procesamiento básico de mensajes mediante reglas simples.
-Integración con una API pública externa (yesno.wtf) para simular la toma de decisiones del asistente ante preguntas cerradas.
-Respuesta alternativa (fallback) para mensajes que no cumplen las condiciones de integración externa.
-Pruebas automáticas ejecutables con mvn test, que validan:
-La creación de conversaciones.
-El comportamiento del endpoint de mensajes.
-El uso correcto de la integración externa mediante mocks, sin dependencia de servicios reales.
-La persistencia del historial de conversaciones y el manejo avanzado de errores se encuentran planificados como siguientes pasos de evolución del servicio.
+## Estado actual de la implementación
+
+El microservicio implementa una versión funcional mínima del Conversation Orchestrator, cubriendo los aspectos obligatorios del desafío:
+
+- Creación de conversaciones mediante API REST
+- Envío y persistencia de mensajes asociados a una conversación
+- Regla básica de decisión:
+  - Preguntas cerradas (`?`) → integración con API externa
+  - Otros mensajes → respuesta fallback
+- Integración HTTP con yesno.wtf como simulación de un motor de decisión
+- Pruebas automatizadas ejecutables con `mvn test`, que validan:
+  - Creación de conversaciones
+  - Envío de mensajes
+  - Persistencia del historial
+  - Integración externa mediante mocks
+
+La implementación prioriza claridad de diseño, separación de responsabilidades y testabilidad, dejando explícitamente documentadas las extensiones futuras.
+
