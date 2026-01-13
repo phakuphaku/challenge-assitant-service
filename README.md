@@ -137,14 +137,8 @@ El microservicio está diseñado para ser **horizontalmente escalable**:
 
 ---
 
-## Seguridad (opcional)
-
-Por simplicidad, no se implementa autenticación en esta versión.
-
-En un entorno productivo, el servicio podría protegerse mediante:
-- JWT para autenticación entre servicios
-- API Gateway como punto de entrada
-- Validación de scopes o roles por endpoint
+## Seguridad
+No se implementa autenticación en esta versión.
 
 ---
 
@@ -153,8 +147,40 @@ En un entorno productivo, el servicio podría protegerse mediante:
 Se incluyen diagramas de referencia para facilitar la comprensión del diseño:
 
 - **Diagrama de componentes**: muestra la relación entre el microservicio y sus dependencias.
-- **Diagrama de secuencia**: describe el flujo de procesamiento de un mensaje de usuario.
 
+Client
+  → ConversationController
+    → ConversationService
+      → Repositories (Conversation / Message)
+      → External API (yesno.wtf)
+
+> **Nota sobre el alcance**
+> La lógica del ConversationService se encuentra abstraída y validada mediante tests con mocks.
+> La implementación concreta se dejó fuera del alcance para priorizar el diseño de contratos, persistencia y flujo conversacional, alineado con los objetivos del challenge.
+
+- **Diagrama de secuencia**: describe el flujo de procesamiento de un mensaje de usuario.
+### Caso de uso: Envío de mensaje con signo de pregunta (descripción textual)
+
+1. El cliente envía un mensaje a: POST /api/v1/conversations/{id}/messages
+2. El ConversationController recibe la request y delega el procesamiento al ConversationService.
+3. El servicio:
+* * Recupera la conversación desde ConversationRepository.
+* * Persiste el mensaje del usuario.
+4. Se evalúa el contenido del mensaje:
+* - Si contiene un signo de pregunta (?), se considera una pregunta cerrada.
+5. El servicio realiza una llamada HTTP a la API externa yesno.wtf para obtener una respuesta.
+6. La respuesta externa es:
+* - Persistida como mensaje del asistente.
+* - Incluida en la respuesta al cliente.
+7. El controller devuelve un 200 OK con el estado actualizado de la conversación.
+
+### Caso alternativo: Mensaje sin signo de pregunta
+
+1. El flujo inicial es el mismo hasta la evaluación del contenido.
+2. Al no detectar una pregunta cerrada:
+* * Se genera una respuesta de fallback.
+* * Se persiste el mensaje de fallback.
+3. Se devuelve la conversación actualizada sin llamar a servicios externos.
 ---
 
 ## Estructura del proyecto
@@ -195,9 +221,6 @@ Los siguientes aspectos quedan explícitamente fuera del alcance de esta impleme
 Estos elementos podrían incorporarse en una evolución posterior del sistema sin requerir cambios estructurales significativos.
 
 ---
-
-## Estado actual de la implementación
-
 ## Estado actual de la implementación
 
 El microservicio implementa una versión funcional mínima del Conversation Orchestrator, cubriendo los aspectos obligatorios del desafío:
