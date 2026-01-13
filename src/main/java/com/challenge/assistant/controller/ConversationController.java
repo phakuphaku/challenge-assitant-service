@@ -7,6 +7,9 @@ import com.challenge.assistant.model.Conversation;
 import com.challenge.assistant.model.Message;
 import com.challenge.assistant.persistence.repository.ConversationRepository;
 import com.challenge.assistant.persistence.repository.MessageRepository;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +46,7 @@ public class ConversationController {
     @PostMapping("/{id}/messages")
     public ResponseEntity<ConversationResponseDTO> addMessage(
             @PathVariable Long id,
-            @RequestBody UserMessageRequest content) {
+            @Valid @RequestBody UserMessageRequest content) {
 
         return conversationRepository.findById(id)
                 .map(conv -> {

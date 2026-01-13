@@ -200,3 +200,4 @@ La creación de conversaciones.
 El comportamiento del endpoint de mensajes.
 El uso correcto de la integración externa mediante mocks, sin dependencia de servicios reales.
 La persistencia del historial de conversaciones y el manejo avanzado de errores se encuentran planificados como siguientes pasos de evolución del servicio.
+Se implementó el manejo explícito de errores para recursos inexistentes a nivel de dominio (ej. conversaciones no encontradas)
